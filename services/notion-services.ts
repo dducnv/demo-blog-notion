@@ -25,6 +25,9 @@ export const notionServices = {
         },
       ],
     });
+    if (!response.results) {
+      throw new Error("Not found");
+    }
 
     return response.results.map((res: any) =>
       notionServices.pageToPostTransformer(res)
