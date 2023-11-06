@@ -2,6 +2,17 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  headers: () => [
+    {
+      source: "/:path*",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "no-store",
+        },
+      ],
+    },
+  ],
   env: {
     NOTION_ACCESS_TOKEN: "secret_zOT0yUzyeF1ja6JEu9E8mKNpRaLUNFf5vqONica2aOG",
     NOTION_BLOG_DATABASE_ID: "55b47492ad304ff6a6627c2ff3aaf7d3",
