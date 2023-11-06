@@ -68,7 +68,7 @@ export const notionServices = {
     }
   ),
 
-  pageToPostTransformer: (page: any): BlogPost => {
+  pageToPostTransformer: React.cache((page: any): BlogPost => {
     const cover =
       page.cover != null &&
       (page.cover.type === "file"
@@ -86,5 +86,5 @@ export const notionServices = {
       description: page.properties.Description.rich_text[0].plain_text,
       date: page.properties.CreatedTime.created_time,
     };
-  },
+  }),
 };
