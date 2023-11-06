@@ -30,14 +30,23 @@ export const notionServices = {
     );
   },
 
-  getDetailNotionBlogPost: async (id: string): Promise<PostPage> => {
+  getDetailNotionBlogPost: async (slug: string): Promise<PostPage> => {
     let post, markdown; //khai báo 2 biến post và markdown
     const response = await client.databases.query({
       database_id: notionDatabaseId!,
+      filter: {
+        property: "Slug",
+        formula: {
+          string: {
+            equals: slug, // slug
+          },
+        },
+        // add option for tags in the future
+      },
     });
 
     //nếu không tìm thấy bài viết thì sẽ throw ra lỗi
-    if (response.results.length == 0) {
+    if (!response.results[0]) {
       throw new Error("Not found");
     }
 
@@ -69,6 +78,7 @@ export const notionServices = {
       id: page.id,
       cover,
       title: page.properties.Title.title[0].plain_text,
+      slug: page.properties.Slug.formula.string,
       tags: page.properties.Tags.multi_select,
       description: page.properties.Description.rich_text[0].plain_text,
       date: page.properties.CreatedTime.created_time,

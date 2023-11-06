@@ -1,14 +1,18 @@
 import { notionServices } from "@/services/notion-services";
 
 import { marked } from "marked";
-async function getSinglePost(id: string) {
-  const blogPost = await notionServices.getDetailNotionBlogPost(id);
+async function getSinglePost(slug: string) {
+  const blogPost = await notionServices.getDetailNotionBlogPost(slug);
 
   return blogPost;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const post = await getSinglePost(params.id);
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const post = await getSinglePost(params.slug);
   if (!post) {
     return {
       notFound: true,
@@ -53,13 +57,15 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const details = await getSinglePost(params.id);
+export default async function Page({ params }: { params: { slug: string } }) {
+  const details = await getSinglePost(params.slug);
+
   if (!details) {
     return {
       notFound: true,
     };
   }
+  console.log(details);
   const { post, markdown } = details;
   return (
     <>
@@ -81,12 +87,14 @@ export default async function Page({ params }: { params: { id: string } }) {
             {new Date(post.date).toLocaleDateString()}
           </p>
         </div>
-        <article
-          className="prose prose-neutral dark:prose-invert mb-10"
-          dangerouslySetInnerHTML={{
-            __html: marked(markdown!),
-          }}
-        />
+        {markdown && (
+          <article
+            className="prose prose-neutral dark:prose-invert mb-10"
+            dangerouslySetInnerHTML={{
+              __html: marked(markdown!),
+            }}
+          />
+        )}
       </div>
     </>
   );

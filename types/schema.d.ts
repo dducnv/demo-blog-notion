@@ -9,6 +9,7 @@ export type BlogPost = {
   id: string; // ID
   cover: string; // Ảnh bìa
   title: string; // Tiêu đề
+  slug: string; // Slug
   tags: Tag[]; // Danh sách tags
   description: string;
   date: string;

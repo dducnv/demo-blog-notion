@@ -40,7 +40,7 @@ export default async function Home() {
                     <h3 className="flex-1 py-2 text-lg font-semibold leadi">
                       <Link
                         rel="noopener noreferrer"
-                        href={`/blog/${post.id}`}
+                        href={`/blog/${post.slug}`}
                         aria-label="Te nulla oportere reprimique his dolorum"
                       >
                         {post.title}
