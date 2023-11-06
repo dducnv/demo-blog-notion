@@ -10,6 +10,7 @@ export const n2m = new NotionToMarkdown({ notionClient: client });
 
 export const notionServices = {
   getNotionBlogPosts: React.cache(async (): Promise<BlogPost[]> => {
+    let posts;
     const response = await client.databases.query({
       database_id: notionDatabaseId!,
       filter: {
@@ -25,13 +26,14 @@ export const notionServices = {
         },
       ],
     });
-    if (!response.results) {
-      throw new Error("Not found");
+    if (response.results.length <= 0) {
+      return [];
     }
-
-    return response.results.map((res: any) =>
+    posts = response.results.map((res: any) =>
       notionServices.pageToPostTransformer(res)
     );
+
+    return posts;
   }),
 
   getDetailNotionBlogPost: React.cache(
