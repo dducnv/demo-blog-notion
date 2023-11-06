@@ -1,6 +1,7 @@
 import { BlogPost, PostPage } from "@/types/schema";
 import { Client } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
+import React from "react";
 
 const notionSecret = process.env.NOTION_ACCESS_TOKEN;
 const notionDatabaseId = process.env.NOTION_BLOG_DATABASE_ID;
@@ -8,7 +9,7 @@ export const client = new Client({ auth: notionSecret });
 export const n2m = new NotionToMarkdown({ notionClient: client });
 
 export const notionServices = {
-  getNotionBlogPosts: async (): Promise<BlogPost[]> => {
+  getNotionBlogPosts: React.cache(async (): Promise<BlogPost[]> => {
     const response = await client.databases.query({
       database_id: notionDatabaseId!,
       filter: {
@@ -28,42 +29,44 @@ export const notionServices = {
     return response.results.map((res: any) =>
       notionServices.pageToPostTransformer(res)
     );
-  },
+  }),
 
-  getDetailNotionBlogPost: async (slug: string): Promise<PostPage> => {
-    let post, markdown; //khai báo 2 biến post và markdown
-    const response = await client.databases.query({
-      database_id: notionDatabaseId!,
-      filter: {
-        property: "Slug",
-        formula: {
-          string: {
-            equals: slug, // slug
+  getDetailNotionBlogPost: React.cache(
+    async (slug: string): Promise<PostPage> => {
+      let post, markdown; //khai báo 2 biến post và markdown
+      const response = await client.databases.query({
+        database_id: notionDatabaseId!,
+        filter: {
+          property: "Slug",
+          formula: {
+            string: {
+              equals: slug, // slug
+            },
           },
+          // add option for tags in the future
         },
-        // add option for tags in the future
-      },
-    });
+      });
 
-    //nếu không tìm thấy bài viết thì sẽ throw ra lỗi
-    if (!response.results[0]) {
-      throw new Error("Not found");
+      //nếu không tìm thấy bài viết thì sẽ throw ra lỗi
+      if (!response.results[0]) {
+        throw new Error("Not found");
+      }
+
+      //lấy ra bài viết đầu tiên
+      const page = response.results[0];
+      //lấy ra markdown của bài viết
+      const mdBlocks = await n2m.pageToMarkdown(page.id);
+      //chuyển markdown thành chuỗi
+      markdown = n2m.toMarkdownString(mdBlocks);
+      //chuyển page thành post
+      post = notionServices.pageToPostTransformer(page);
+
+      return {
+        post: post,
+        markdown: markdown.parent,
+      };
     }
-
-    //lấy ra bài viết đầu tiên
-    const page = response.results[0];
-    //lấy ra markdown của bài viết
-    const mdBlocks = await n2m.pageToMarkdown(page.id);
-    //chuyển markdown thành chuỗi
-    markdown = n2m.toMarkdownString(mdBlocks);
-    //chuyển page thành post
-    post = notionServices.pageToPostTransformer(page);
-
-    return {
-      post: post,
-      markdown: markdown.parent,
-    };
-  },
+  ),
 
   pageToPostTransformer: (page: any): BlogPost => {
     const cover =
