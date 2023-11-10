@@ -20,7 +20,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4">
             {blogPosts.map((post) => (
               <>
-                <article className="flex flex-col dark:bg-gray-900">
+                <article className="flex flex-col dark:bg-gray-900 relative">
                   <img
                     alt=""
                     className="object-cover w-full h-52 dark:bg-gray-500"
@@ -52,6 +52,9 @@ export default async function Home() {
                       </time>
                     </div>
                   </div>
+                  <Link href={`/blog/${post.slug}`}>
+                    <span className="absolute -inset-y-2.5 -inset-x-4 md:-inset-y-4 md:-inset-x-6 sm:rounded-2xl" />
+                  </Link>
                 </article>
               </>
             ))}
